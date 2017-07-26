@@ -1,0 +1,39 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: circleci/golang:1.8
+    working_directory: ~/code
+    environment:
+      TEST_RESULTS: /tmp/test-results
+    steps:
+      - checkout
+      - run: mkdir -p $TEST_RESULTS
+      - run: go get github.com/jstemmer/go-junit-report
+      - run: go get github.com/golang/lint/golint
+      # @todo add lint make command.
+#      - run:
+#          name: Run linting
+#          command: make lint
+      - run:
+          name: Run unit tests
+          command: |
+            trap "go-junit-report <${TEST_RESULTS}/go-test.out > ${TEST_RESULTS}/go-test-report.xml" EXIT
+            make test | tee ${TEST_RESULTS}/go-test.out
+      - store_artifacts:
+          path: /tmp/test-results
+          destination: raw-test-output
+      - store_test_results:
+          path: /tmp/test-results
+
+  # @todo automate package and release.
+#  deploy-master:
+#    docker:
+#      - image: docker:17.05.0-ce-git
+#    working_directory: ~/code
+#    steps:
+#      - checkout
+#      - setup_remote_docker
+#      - run: |
+#          docker login -u $DOCKER_USER -p $DOCKER_PASS
+#          make release
