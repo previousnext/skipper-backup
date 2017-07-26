@@ -32,12 +32,7 @@ func main() {
 	kingpin.Parse()
 
 	// Load the Skipper configuration.
-	key, err := config("backup.id")
-	if err != nil {
-		panic(err)
-	}
-
-	secret, err := config("backup.secret")
+	key, secret, err := obtainCredentialsSkipper()
 	if err != nil {
 		panic(err)
 	}
@@ -65,6 +60,21 @@ func main() {
 	}
 
 	fmt.Println("Successfully uploaded:", result.Location)
+}
+
+// Helper function to obtain AWS credentials configured with skipper.
+func obtainCredentialsSkipper() (string, string, error) {
+	key, err := config("backup.id")
+	if err != nil {
+		return "", "", err
+	}
+
+	secret, err := config("backup.secret")
+	if err != nil {
+		return "", "", err
+	}
+
+	return key, secret, err
 }
 
 func config(name string) (string, error) {
