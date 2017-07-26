@@ -83,15 +83,22 @@ func tokens(r string) string {
 		current = time.Now().Local()
 	)
 
+	return tokensReplace(r, current, day, weekday)
+}
+
+func tokensReplace(r string, current time.Time, day int, weekday time.Weekday) string {
 	r = strings.Replace(r, tokenTime, current.Format("2006-01-02_15-04-05"), -1)
 
+	// Place backup into monthly directory if taken on first of the month.
 	if day == 1 {
 		return strings.Replace(r, tokenFreq, "monthly", -1)
 	}
 
+	// Place backup into weekly directory if taken on first Sunday.
 	if weekday == time.Sunday {
 		return strings.Replace(r, tokenFreq, "weekly", -1)
 	}
 
+	// Default to daily.
 	return strings.Replace(r, tokenFreq, "daily", -1)
 }
