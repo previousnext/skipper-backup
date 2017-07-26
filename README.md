@@ -1,6 +1,8 @@
 Skipper - Backups
 =================
 
+[![CircleCI](https://circleci.com/gh/previousnext/skipper-backup.svg?style=svg)](https://circleci.com/gh/previousnext/skipper-backup)
+
 A small utility for chaining backup strategies.
 
 ## Usage
