@@ -7,6 +7,19 @@ import (
 	"time"
 )
 
+// Ensure timestamp tokenisation works.
+func TestTokenReplacementTimestamp(t *testing.T) {
+	timestampPlaceholder := "%TIMESTAMP%"
+	knownTimestamp := "2020-10-11_12-13-14"
+	knownTime, err := time.Parse("2006-01-02_15-04-05", knownTimestamp)
+	if err != nil {
+		panic(err)
+	}
+
+	// Test timestamp replacement returns expected format.
+	assert.Equal(t, knownTimestamp, tokensReplace(timestampPlaceholder, knownTime, 11, time.Thursday))
+}
+
 // Ensure frequency tokenisation works.
 func TestTokenReplacementFrequency(t *testing.T) {
 	frequencyPlaceholder := "%FREQUENCY%"
