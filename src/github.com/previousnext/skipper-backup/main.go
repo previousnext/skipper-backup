@@ -31,16 +31,8 @@ func main() {
 	kingpin.CommandLine.Help = "Backup Utility"
 	kingpin.Parse()
 
-	// Load the Skipper configuration.
-	key, err := config("backup.id")
-	if err != nil {
-		panic(err)
-	}
-
-	secret, err := config("backup.secret")
-	if err != nil {
-		panic(err)
-	}
+	// Load AWS session.
+	sess := awsSession()
 
 	// Load the file to upload.
 	file, err := os.Open(*cliLocal)
@@ -49,11 +41,8 @@ func main() {
 	}
 	defer file.Close()
 
-	uploader := s3manager.NewUploader(session.New(&aws.Config{
-		Region:      cliRegion,
-		Credentials: credentials.NewStaticCredentials(key, secret, ""),
-	}))
-
+	// Upload to s3.
+	uploader := s3manager.NewUploader(sess)
 	result, err := uploader.Upload(&s3manager.UploadInput{
 		Body:   file,
 		Bucket: cliBucket,
@@ -65,6 +54,50 @@ func main() {
 	}
 
 	fmt.Println("Successfully uploaded:", result.Location)
+}
+
+// Helper function which creates AWS session.
+func awsSession() *session.Session {
+	// Attempt to use default AWS credential chain.
+	sess, err := session.NewSessionWithOptions(session.Options{
+		Config: aws.Config{
+			Region: cliRegion,
+		},
+		SharedConfigState: session.SharedConfigEnable,
+	})
+	_, err = sess.Config.Credentials.Get()
+	if err != nil {
+		// If that fails, attempt to load creds from Skipper configuration.
+		key, secret, err := obtainCredentialsSkipper()
+		if err != nil {
+			panic(err)
+		}
+
+		sess, err = session.NewSession(&aws.Config{
+			Region:      cliRegion,
+			Credentials: credentials.NewStaticCredentials(key, secret, ""),
+		})
+		if err != nil {
+			panic(err)
+		}
+	}
+
+	return sess
+}
+
+// Helper function to obtain AWS credentials configured with skipper.
+func obtainCredentialsSkipper() (string, string, error) {
+	key, err := config("backup.id")
+	if err != nil {
+		return "", "", err
+	}
+
+	secret, err := config("backup.secret")
+	if err != nil {
+		return "", "", err
+	}
+
+	return key, secret, err
 }
 
 func config(name string) (string, error) {
