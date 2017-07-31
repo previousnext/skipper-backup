@@ -22,9 +22,8 @@ $ backup /tmp/drupal.tar.gz BUCKET "%FREQUENCY%/drupal/%TIMESTAMP%-dev.tar.gz"
 
 ## Placeholders
 
-||Token||Replacement Value||
-|%FREQUENCY%|3 possible values: **monthly** on 1st of month, **weekly** on Sunday, **daily** all other times.|
-|%TIMESTAMP%|Current time formatted as **2006-01-02_15-04-05**|
+* `%FREQUENCY%` - 3 possible values: **monthly** on 1st of month, **weekly** on Sunday, **daily** all other times.
+* `%TIMESTAMP%` - Current time formatted as **2006-01-02_15-04-05**
 
 ## Development
 
